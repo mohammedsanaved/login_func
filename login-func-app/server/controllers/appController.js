@@ -80,7 +80,7 @@ export async function login(req, res) {
       //create a JWT token
       const token = jwt.sign(
         {
-          userId: user._id,
+          id: user._id,
           username: user.username,
         },
         ENV.JWT_SECRET,
@@ -100,8 +100,24 @@ export async function login(req, res) {
 
 /** GET: http://localhost:8080/api/user/example123 */
 export async function getUser(req, res) {
-  res.json('getUser route');
+  const { username } = req.params;
+  console.log(req.params);
+  try {
+    if (!username) {
+      return res.status(400).send({ error: 'Invalid Username' });
+    }
+    const user = await userModel.findOne({ username }).select('-password');
+    console.log(user);
+    if (!user) {
+      return res.status(404).send({ error: "Couldn't Find the User" });
+    } else {
+      return res.status(200).send(user);
+    }
+  } catch (error) {
+    return res.status(500).send({ error: "Couldn't find user data" });
+  }
 }
+
 /** PUT: http://localhost:8080/api/updateuser 
  * @param: {
   "header" : "<token>"
@@ -113,8 +129,27 @@ body: {
 }
 */
 export async function updateUser(req, res) {
-  res.json('updateUser route');
+  try {
+    // const { id } = req.user;
+    const { id } = req.query;
+    console.log(id);
+
+    if (id) {
+      const body = req.body;
+
+      // update the data
+      await userModel.updateOne({ _id: id }, body);
+    } else {
+      return res.status(404).send({ error: 'User Not Found' });
+    }
+
+    return res.status(200).send({ msg: 'Record Updated...!' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ error: 'Internal Server Error' });
+  }
 }
+
 /** GET: http://localhost:8080/api/generateOTP */
 export async function generateOTP(req, res) {
   res.json('genrateOTP');

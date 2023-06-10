@@ -9,7 +9,7 @@ import {
   updateUser,
   verifyOTP,
 } from '../controllers/appController.js';
-import { verifyUser } from '../middleware/authMiddleware.js';
+import { verifyUser, protect } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
@@ -25,7 +25,7 @@ router.route('/generateOTP').get(generateOTP); // generate random OTP
 router.route('/verifyOTP').get(verifyOTP); // verify generated OT
 router.route('/createresetSession').get(createResetSession); // reset all the variables
 //PUT
-router.route('/updateuser').put(updateUser); // update user data
+router.route('/updateuser').put(protect, updateUser); // update user data
 router.route('/resetPassword').put(resetPassword); // resetPassword Data
 
 //DELETE
