@@ -1,30 +1,48 @@
 // import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import avatar from '../assets/profile.png';
 import '../styles/username.css';
 import { useFormik } from 'formik';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import { passwordValidate } from '../helper/validate';
 import useFetch from '../hook/fetch';
 import { useAuthStore } from '../store/store';
+import { verifyPassword } from '../helper/route';
 
 const Password = () => {
+  const navigate = useNavigate();
   const { username } = useAuthStore((state) => state.auth);
-  const [{ isLoading, serverError, apiData }] = useFetch(`/user`);
+  const [{ isLoading, apiData, serverError }] = useFetch(`/user/${username}`);
+
   const formik = useFormik({
     initialValues: {
-      password: '',
+      password: 'admin@123',
     },
     validate: passwordValidate,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async (values) => {
-      console.log(values);
-      console.log(username);
+      let loginPromise = verifyPassword({
+        username,
+        password: values.password,
+      });
+      toast.promise(loginPromise, {
+        loading: 'Checking...',
+        success: <b>Login Successfully...!</b>,
+        error: <b>Password Not Match!</b>,
+      });
+
+      loginPromise.then((res) => {
+        let { token } = res.data;
+        localStorage.setItem('token', token);
+        navigate('/profile');
+      });
     },
   });
-  if (isLoading) return <h2>IsLoading</h2>;
-  if (serverError) return <h2>{serverError.message}</h2>;
+
+  if (isLoading) return <h1 className='text-2xl font-bold'>isLoading</h1>;
+  if (serverError)
+    return <h1 className='text-xl text-red-500'>{serverError.message}</h1>;
   return (
     <div className='container mx-auto'>
       <Toaster position='top-center' reverseOrder={false}></Toaster>
