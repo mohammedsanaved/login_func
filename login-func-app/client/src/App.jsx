@@ -22,5 +22,5 @@ function App() {
     </Router>
   );
 }
-
+export const server = 'http://localhost:5000';
 export default App;

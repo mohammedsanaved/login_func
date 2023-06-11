@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import avatar from '../assets/profile.png';
 import '../styles/username.css';
 import { useFormik } from 'formik';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import { registerValidation } from '../helper/validate';
 import { useState } from 'react';
 import convertToBase64 from '../helper/convert';
+import { registerUser } from '../helper/route';
 
 const Register = () => {
   const [file, setFile] = useState();
@@ -21,7 +22,12 @@ const Register = () => {
     validateOnChange: false,
     onSubmit: async (values) => {
       values = await Object.assign(values, { profile: file || '' });
-      console.log(values);
+      let registerPromise = registerUser(values);
+      toast.promise(registerPromise, {
+        loading: 'Creating',
+        success: <b>Register success</b>,
+        error: <b>Process Failed</b>,
+      });
     },
   });
 
